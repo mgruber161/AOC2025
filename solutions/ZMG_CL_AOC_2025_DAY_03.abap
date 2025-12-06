@@ -54,6 +54,43 @@ CLASS zmg_cl_aoc_2025_day_03 IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zmg_if_aoc_2025_day~solve_part2.
+    DATA(lv_joltsum) = VALUE int8( ).
+    LOOP AT it_input INTO DATA(lv_str).
+      CONDENSE lv_str NO-GAPS.
+      DATA(lv_len) = strlen( lv_str ).
+      DATA(lv_to_remove) = lv_len - 12.
+      DATA(lt_stack) = VALUE ty_c_tab( ).
+
+      DO lv_len TIMES.
+        DATA(lv_index) = sy-index - 1.
+        DATA(lv_current) = lv_str+lv_index(1).
+        WHILE lv_to_remove > 0 AND lines( lt_stack ) > 0.
+          DATA(lv_top) = lt_stack[ lines( lt_stack ) ].
+          IF lv_top < lv_current.
+            WHILE lv_top < lv_current AND lv_to_remove > 0 AND lines( lt_stack ) > 0.
+                DELETE lt_stack INDEX lines( lt_stack ).
+                lv_to_remove -= 1.
+                lv_top = COND #( when lines( lt_stack ) > 0 then lt_stack[ lines( lt_stack ) ]
+                                 else 10 ).
+            endWHILE.
+          ELSE.
+            EXIT.
+          ENDIF.
+
+        ENDWHILE.
+        APPEND lv_current TO lt_stack.
+      ENDDO.
+
+      IF lv_to_remove > 0.
+        DO lv_to_remove TIMES.
+          DELETE lt_stack INDEX lines( lt_stack ).
+        ENDDO.
+      ENDIF.
+
+      DATA(lv_result) = CONV int8( concat_lines_of( table = lt_stack ) ).
+      lv_joltsum += lv_result.
+    ENDLOOP.
+    rv_solution = lv_joltsum.
   ENDMETHOD.
 
 
